@@ -22,5 +22,6 @@ include(${COMMON_MAIN_CMAKE} PUBLIC)
 # Include source code
 ################################################################################
 
+add_subdirectory(src/singleton)
 add_subdirectory(src/tasker)
 
