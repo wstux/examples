@@ -122,7 +122,7 @@ int main()
         std::cout << "Failed to listen to" << std::endl;
         return 1;
     }
-    
+
     while (true) {
         std::string msg;
 
