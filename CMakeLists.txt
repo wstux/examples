@@ -23,6 +23,8 @@ include(${COMMON_MAIN_CMAKE} PUBLIC)
 ################################################################################
 
 add_subdirectory(drivers/hello_world)
+add_subdirectory(drivers/proc_fs)
+#add_subdirectory(drivers/proc_fs_old) # work for linux kernel < 3.10
 add_subdirectory(libs/server)
 add_subdirectory(src/messenger_v1)
 add_subdirectory(src/messenger_v2)
