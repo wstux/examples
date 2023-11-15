@@ -22,6 +22,7 @@ include(${COMMON_MAIN_CMAKE} PUBLIC)
 # Include source code
 ################################################################################
 
+add_subdirectory(drivers/hello_world)
 add_subdirectory(libs/server)
 add_subdirectory(src/messenger_v1)
 add_subdirectory(src/messenger_v2)
