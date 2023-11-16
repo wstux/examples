@@ -22,6 +22,7 @@ include(${COMMON_MAIN_CMAKE} PUBLIC)
 # Include source code
 ################################################################################
 
+add_subdirectory(drivers/devrw)
 add_subdirectory(drivers/hello_world)
 add_subdirectory(drivers/mod_args)
 add_subdirectory(drivers/proc_fs)
