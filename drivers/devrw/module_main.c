@@ -22,22 +22,14 @@
 #include <linux/kern_levels.h>
 #include <linux/module.h>
 
-#define MODULE_NAME "devrw"
-#define LOG_PREFIX  MODULE_NAME ": "
+#define KLOG(fmt, ...)          printk(fmt "\n" __VA_OPT__(,) __VA_ARGS__)
 
-#define PROC_FILE   MODULE_NAME "_usage_example"
+#define MODULE_NAME             "devrw"
+#define LOG_PREFIX              MODULE_NAME ": "
 
-#ifndef DEVRW_BUFFER_SIZE
-    #define DEVRW_BUFFER_SIZE       4096
-#endif
-
-#ifndef DEVRW_BUFFERS_COUNT
-    #define DEVRW_BUFFERS_COUNT     128
-#endif
-
-#ifndef DEVRW_ROPE_CAPACITY
-    #define DEVRW_ROPE_CAPACITY     DEVRW_BUFFERS_COUNT * DEVRW_BUFFER_SIZE
-#endif
+#define DEVRW_BUFFER_SIZE       4096
+#define DEVRW_BUFFERS_COUNT     128
+#define DEVRW_ROPE_CAPACITY     DEVRW_BUFFERS_COUNT * DEVRW_BUFFER_SIZE
 
 /******************************************************************************
  *  Data types.
@@ -77,7 +69,7 @@ static module_dev_t* devices_tbl = NULL;    /* allocated in register_device */
 
 static devrw_rope_t* devrw_follow(module_dev_t* p_dev, int idx)
 {
-    devrw_rope_t* p_rope = NULL;
+    devrw_rope_t* p_rope = p_dev->p_rope;
 
     if (p_dev->p_rope == NULL) {
         p_dev->p_rope = kmalloc(sizeof(devrw_rope_t), GFP_KERNEL);
@@ -192,7 +184,7 @@ static ssize_t dev_read(struct file* p_file, char __user* p_buf, size_t count, l
     buf_idx = *p_f_pos / p_dev->capacity;
     pos = *p_f_pos & p_dev->capacity;
     p_data = devrw_follow(p_dev, buf_idx);
-    if ((p_data == NULL) || ! p_data->p_buffer) {
+    if ((p_data == NULL) || (p_data->p_buffer == NULL)) {
         goto dev_read_out;
     }
     if (count > DEVRW_BUFFER_SIZE - pos) {
@@ -213,14 +205,6 @@ dev_read_out:
 
 static int dev_release(struct inode* p_inode, struct file* p_file)
 {
-    module_dev_t* p_dev;
-
-    p_dev = container_of(p_inode->i_cdev, module_dev_t, cdev);
-    if (mutex_lock_interruptible(&p_dev->lock)) {
-        return -ERESTARTSYS;
-    }
-    trim_char_device(p_dev);
-    mutex_unlock(&p_dev->lock);
     return 0;
 }
 
@@ -294,6 +278,7 @@ static void deregister_device(void)
         kfree(devices_tbl);
     }
     unregister_chrdev_region(devno, device_nr_devs);
+    KLOG(KERN_INFO LOG_PREFIX "device successfully deregistered");
 }
 
 static int register_device(void)
@@ -327,6 +312,7 @@ static int register_device(void)
         devices_tbl[i].size = 0;
         setup_char_device(&devices_tbl[i], device_major, device_minor, i, &device_fops);
     }
+    KLOG(KERN_INFO LOG_PREFIX "device successfully registered");
     return 0;
 }
 
@@ -339,7 +325,7 @@ static int register_device(void)
  */
 static void __exit main_module_exit(void)
 {
-    printk(KERN_INFO LOG_PREFIX "module_exit");
+    KLOG(KERN_INFO LOG_PREFIX "module_exit");
     deregister_device();
 }
 
@@ -348,7 +334,7 @@ static void __exit main_module_exit(void)
  */
 static int __init main_module_init(void)
 {
-    printk(KERN_INFO LOG_PREFIX "module_init");
+    KLOG(KERN_INFO LOG_PREFIX "module_init");
     return register_device();
 }
 
