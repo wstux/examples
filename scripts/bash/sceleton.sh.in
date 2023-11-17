@@ -1,0 +1,133 @@
+#!/bin/bash
+
+##########################################################################
+# Variables declaration                                                  #
+##########################################################################
+
+VALUE=""
+
+##########################################################################
+# Logging                                                                #
+##########################################################################
+
+declare -A __severity_levels=([TRACE]=0 [DEBUG]=1 [INFO]=2 [WARN]=3 [ERROR]=4)
+__severity_level="WARN"
+
+function log
+{
+    local log_lvl=$1
+    local log_msg=$2
+
+    # Check if level exists.
+    if [[ ! ${__severity_levels[$log_lvl]} ]]; then
+        return
+    fi
+    # Check if level is enough.
+    if (( ${__severity_levels[$log_lvl]} < ${__severity_levels[$__severity_level]} )); then
+        return
+    fi
+
+    echo "[${log_lvl}] ${log_msg}"
+}
+
+function log_trace {
+    log "TRACE" "$1"
+}
+function log_debug {
+    log "DEBUG" "$1"
+}
+function log_info {
+    log "INFO" "$1"
+}
+function log_warn {
+    log "WARN" "$1"
+}
+function log_error {
+    log "ERROR" "$1"
+}
+
+function log_level
+{
+    echo "${__severity_level}"
+}
+
+function logging_set_severity_level
+{
+    local log_lvl=$1
+
+    # Check if level exists.
+    if [[ ${__severity_levels[$log_lvl]} ]]; then
+        __severity_level="${log_lvl}"
+    fi
+}
+
+##########################################################################
+# Private functions                                                      #
+##########################################################################
+
+##########################################################################
+# Public functions                                                       #
+##########################################################################
+
+function usage
+{
+    echo "Usage '"$0"' <args>"
+}
+
+##########################################################################
+# Main                                                                   #
+##########################################################################
+
+IS_CMD=0
+IS_FLAG=0
+IS_VALUE=0
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -f|--flag)
+            IS_FLAG=1
+            shift # past arg
+            ;;
+        -c|--cmd)
+            IS_CMD=1
+            shift # past arg
+            ;;
+        -v|--value)
+            IS_VALUE=1
+            VALUE="$2"
+            shift # past arg
+            shift # past val
+            ;;
+        -l|--loglevel)
+            logging_set_severity_level "$2"
+            shift # past arg
+            shift # past val
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        -*|--*)
+            echo "Unknown option '"$1"'"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [[ "$(($IS_FLAG + $IS_CMD))" -ne "1" ]]; then
+    echo "Invalid input parameters. The command must be one."
+    echo ""
+    usage
+    exit 1
+fi
+
+if [[ "$IS_VALUE" -eq "0" ]]; then
+    echo "Invalid input parameters. The 'value' must be set."
+    echo ""
+    usage
+    exit 1
+fi
+
+log_info "Value is '"${VALUE}"'"
+
