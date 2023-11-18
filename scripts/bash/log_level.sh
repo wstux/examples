@@ -17,9 +17,7 @@ function log
     local log_msg=$2
 
     # Check if level exists.
-    if [[ ! ${__severity_levels[${log_lvl}]} ]]; then
-        return
-    fi
+    if [[ ! ${__severity_levels[${log_lvl}]} ]]; then return; fi
     # Check if level is enough.
     if (( ${__severity_levels[${log_lvl}]} < ${__severity_levels[${__severity_level}]} )); then
         return
@@ -28,36 +26,14 @@ function log
     echo "[${log_lvl}] ${log_msg}"
 }
 
-function log_trace {
-    log "TRACE" "$1"
-}
-function log_debug {
-    log "DEBUG" "$1"
-}
-function log_info {
-    log "INFO" "$1"
-}
-function log_warn {
-    log "WARN" "$1"
-}
-function log_error {
-    log "ERROR" "$1"
-}
+function log_trace { log "TRACE" "$1"; }
+function log_debug { log "DEBUG" "$1"; }
+function log_info  { log "INFO"  "$1"; }
+function log_warn  { log "WARN"  "$1"; }
+function log_error { log "ERROR" "$1"; }
 
-function log_level
-{
-    echo "${__severity_level}"
-}
-
-function logging_set_severity_level
-{
-    local log_lvl=$1
-
-    # Check if level exists.
-    if [[ ${__severity_levels[${log_lvl}]} ]]; then
-        __severity_level="${log_lvl}"
-    fi
-}
+function log_level { echo "${__severity_level}"; }
+function logging_set_severity_level { if [[ ${__severity_levels[${1}]} ]]; then __severity_level="${1}"; fi; }
 
 ##########################################################################
 # Private functions                                                      #
