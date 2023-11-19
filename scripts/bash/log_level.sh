@@ -11,6 +11,9 @@
 declare -A __severity_levels=([TRACE]=0 [DEBUG]=1 [INFO]=2 [WARN]=3 [ERROR]=4)
 __severity_level="WARN"
 
+function log_level { echo "${__severity_level}"; }
+function logging_set_severity_level { if [[ ${__severity_levels[${1}]} ]]; then __severity_level="${1}"; fi; }
+
 function log
 {
     local log_lvl=$1
@@ -31,9 +34,6 @@ function log_debug { log "DEBUG" "$1"; }
 function log_info  { log "INFO"  "$1"; }
 function log_warn  { log "WARN"  "$1"; }
 function log_error { log "ERROR" "$1"; }
-
-function log_level { echo "${__severity_level}"; }
-function logging_set_severity_level { if [[ ${__severity_levels[${1}]} ]]; then __severity_level="${1}"; fi; }
 
 ##########################################################################
 # Private functions                                                      #

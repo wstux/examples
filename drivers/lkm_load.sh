@@ -16,6 +16,9 @@ DEVICE=""
 declare -A __severity_levels=([TRACE]=0 [DEBUG]=1 [INFO]=2 [WARN]=3 [ERROR]=4)
 __severity_level="WARN"
 
+function log_level { echo "${__severity_level}"; }
+function logging_set_severity_level { if [[ ${__severity_levels[${1}]} ]]; then __severity_level="${1}"; fi; }
+
 function log
 {
     local log_lvl=$1
@@ -37,23 +40,12 @@ function log_info  { log "INFO"  "$1"; }
 function log_warn  { log "WARN"  "$1"; }
 function log_error { log "ERROR" "$1"; }
 
-function log_level { echo "${__severity_level}"; }
-function logging_set_severity_level { if [[ ${__severity_levels[${1}]} ]]; then __severity_level="${1}"; fi; }
-
 ##########################################################################
 # Private functions                                                      #
 ##########################################################################
 
 function dest_device { echo "/dev/${DEVICE}"; }
-
-function get_repository_root_dir
-{
-    local script_abs_path="$( realpath "$0" )"
-    local script_abs_dir="$( dirname "${script_abs_path}" )"
-    local repo_dir="$( realpath "${script_abs_dir}/.." )"
-    echo "${repo_dir}"
-}
-
+function get_repository_root_dir { echo "$( realpath "$( dirname "$( realpath "$0" )" )/.." )"; }
 function major_version { echo "$( awk "\$2==\"$DEVICE\" {print \$1}" /proc/devices )"; }
 function module_source_dir { echo "$( get_repository_root_dir )/build_release/drivers/${DEVICE}"; }
 function module_source_file { echo "$( module_source_dir )/${DEVICE}.ko"; }
