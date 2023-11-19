@@ -32,4 +32,5 @@ add_subdirectory(src/messenger_v1)
 add_subdirectory(src/messenger_v2)
 add_subdirectory(src/singleton)
 add_subdirectory(src/tasker)
+add_subdirectory(tests)
 

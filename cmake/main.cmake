@@ -102,6 +102,7 @@ message(STATUS "[INFO ] Shared linker flags: ${CMAKE_SHARED_LINKER_FLAGS}")
 ################################################################################
 
 include(build_targets)
+include(custom_test_targets)
 include(driver_targets)
 include(external_targets)
 include(wrapper_targets)
