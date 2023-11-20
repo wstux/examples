@@ -1,76 +1,21 @@
 #!/bin/bash
 
 ##########################################################################
+# Includes                                                               #
+##########################################################################
+
+__test_dir="$( dirname "$( realpath "$0" )" )"
+
+test -f "${__test_dir}/test_fixture.sh" || { echo "Subscript '${__test_dir}/test_fixture.sh' does not exist"; exit 1; }
+source "${__test_dir}/test_fixture.sh" "devrw"
+
+##########################################################################
 # Variables declaration                                                  #
 ##########################################################################
-
-DEVICE_NAME="devrw"
-DEVICE="/dev/${DEVICE_NAME}"
-
-##########################################################################
-# Logging                                                                #
-##########################################################################
-
-declare -A __severity_levels=([TRACE]=0 [DEBUG]=1 [INFO]=2 [WARN]=3 [ERROR]=4)
-__severity_level="WARN"
-
-function log
-{
-    local log_lvl=$1
-    local log_msg=$2
-
-    # Check if level exists.
-    if [[ ! ${__severity_levels[${log_lvl}]} ]]; then return; fi
-    # Check if level is enough.
-    if (( ${__severity_levels[${log_lvl}]} < ${__severity_levels[${__severity_level}]} )); then
-        return
-    fi
-
-    echo "[${log_lvl}] ${log_msg}"
-}
-
-function log_trace { log "TRACE" "$1"; }
-function log_debug { log "DEBUG" "$1"; }
-function log_info  { log "INFO"  "$1"; }
-function log_warn  { log "WARN"  "$1"; }
-function log_error { log "ERROR" "$1"; }
-
-function log_level { echo "${__severity_level}"; }
-function logging_set_severity_level { if [[ ${__severity_levels[${1}]} ]]; then __severity_level="${1}"; fi; }
 
 ##########################################################################
 # Private functions                                                      #
 ##########################################################################
-
-function get_repository_root_dir
-{
-    local script_abs_path="$( realpath "$0" )"
-    local script_abs_dir="$( dirname "${script_abs_path}" )"
-    local repo_dir="$( realpath "${script_abs_dir}/.." )"
-    echo "${repo_dir}"
-}
-
-function load_device
-{
-    local loader_path="$( get_repository_root_dir )/drivers/lkm_load.sh"
-
-    local rc="$( sudo /bin/bash "${loader_path}" --lkm "${DEVICE_NAME}" -l --loglevel "$( log_level )" )"
-    if [[ "$rc" -ne "0" ]]; then
-        log_error "Failed to load device '"${DEVICE_NAME}"'"
-        exit 1
-    fi
-}
-
-function unload_device
-{
-    local loader_path="$( get_repository_root_dir )/drivers/lkm_load.sh"
-
-    local rc="$( sudo /bin/bash "${loader_path}" --lkm "${DEVICE_NAME}" -u --loglevel "$( log_level )" )"
-    if [[ "$rc" -ne "0" ]]; then
-        log_error "Failed to unload device '"${DEVICE_NAME}"'"
-        exit 1
-    fi
-}
 
 ##########################################################################
 # Public functions                                                       #
@@ -78,32 +23,29 @@ function unload_device
 
 function ut_read_from_device
 {
-    local char_device="${DEVICE}"
-    local test_data="test_message"
+    local char_device="$( get_device )"
+    local etalon="test_message"
 
     load_device
 
     # write to device
     cat << EOF > "${char_device}"
-${test_data}
+${etalon}
 EOF
 
     # read from device
     local read_data="$( cat "${char_device}" )"
 
     # check data
-    if [[ "${test_data}" != "${read_data}" ]]; then
-        echo "[FAIL] ut_read_from_device: Failed to read from device. '${test_data}' != '${read_data}'"
-    else
-        echo "[ OK ] ut_read_from_device"
-    fi
+    expect_qe "ut_read_from_device" etalon read_data
 
     unload_device
 }
 
 function ut_write_to_device
 {
-    local char_device="${DEVICE}"
+    local char_device="$( get_device )"
+    local etalon="0"
     local test_data="test message"
 
     load_device
@@ -112,13 +54,9 @@ function ut_write_to_device
     cat << EOF > "${char_device}"
 "${test_data}"
 EOF
-    if [[ "$?" -ne "0" ]]; then
-        echo "[FAIL] ut_write_to_device: Failed to write to device"
-    else
-        echo "[ OK ] ut_write_to_device"
-    fi
 
-
+    local result="$?"
+    expect_qe "ut_write_to_device" etalon result
 
     unload_device
 }
@@ -129,4 +67,6 @@ EOF
 
 ut_read_from_device
 ut_write_to_device
+
+exit $( rc )
 

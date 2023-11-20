@@ -82,6 +82,18 @@ function remove_node
 # Public functions                                                       #
 ##########################################################################
 
+function install_device
+{
+    local dev_path="$( module_source_file )"
+
+    insmod "${dev_path}"
+    local rc="$?"
+    if [[ "$rc" != "0" ]]; then
+        log_error "Failed to install ${DEVICE}"
+        exit 1
+    fi
+}
+
 function load_device
 {
 	local dev_path="$( module_source_file )"
@@ -97,6 +109,7 @@ function load_device
     log_debug "Major version '${major_ver}'"
     if [[ "${major_ver}" -eq "" ]]; then
         log_error "Invalid major version."
+        rmmod "${DEVICE}"
         exit 1
     fi
 
@@ -108,6 +121,8 @@ function load_device
         exit 1
     fi
 }
+
+function uninstall_device { rmmod "${DEVICE}"; }
 
 function unload_device
 {
@@ -134,8 +149,10 @@ function usage
 ##########################################################################
 
 __is_device=0
+__is_install=0
 __is_load=0
 __is_reload=0
+__is_uninstall=0
 __is_unload=0
 
 while [[ $# -gt 0 ]]; do
@@ -146,12 +163,20 @@ while [[ $# -gt 0 ]]; do
             shift   # pass arg
             shift   # pass value
             ;;
+        -i|--install)
+            __is_install=1
+            shift   # pass arg
+            ;;
         -l|--load)
             __is_load=1
             shift   # pass arg
             ;;
         -r|--reload)
             __is_reload=1
+            shift   # pass arg
+            ;;
+        -n|--uninstall)
+            __is_uninstall=1
             shift   # pass arg
             ;;
         -u|--unload)
@@ -175,7 +200,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ "$(($__is_load + $__is_reload + $__is_unload))" -ne "1" ]]; then
+if [[ "$(($__is_load + $__is_reload + $__is_unload + $__is_install + $__is_uninstall))" -ne "1" ]]; then
     echo "Invalid input parameters. The command must be one."
     echo ""
     usage
@@ -204,6 +229,18 @@ elif [[ "$__is_reload" -eq "1" ]]; then
     log_info "Reload device ${DEVICE}"
     unload_device
     load_device
+    exit 0
+elif [[ "$__is_install" -eq "1" ]]; then
+    if [[ ! -f "$( module_source_file )" ]]; then
+        echo "Module does not exist ("$( module_source_file )")."
+        exit 1
+    fi
+    log_info "Install device ${DEVICE}"
+    install_device
+    exit 0
+elif [[ "$__is_uninstall" -eq "1" ]]; then
+    log_info "Uninstall device ${DEVICE}"
+    uninstall_device
     exit 0
 elif [[ "$__is_unload" -eq "1" ]]; then
     log_info "Unload device ${DEVICE}"
