@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _EXPERIMENTS_SERVER_UTILS_H_
-#define _EXPERIMENTS_SERVER_UTILS_H_
+#ifndef _EXAMPLES_SERVER_UTILS_H_
+#define _EXAMPLES_SERVER_UTILS_H_
 
 #include <strings.h>
 #include <unistd.h>
@@ -65,5 +65,5 @@ struct utils
 } // namespace server
 } // namespace wstux
 
-#endif /* _EXPERIMENTS_SERVER_UTILS_H_ */
+#endif /* _EXAMPLES_SERVER_UTILS_H_ */
 

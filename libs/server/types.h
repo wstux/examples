@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _EXPERIMENTS_SERVER_TYPES_H_
-#define _EXPERIMENTS_SERVER_TYPES_H_
+#ifndef _EXAMPLES_SERVER_TYPES_H_
+#define _EXAMPLES_SERVER_TYPES_H_
 
 #include <string>
 #include <unordered_map>
@@ -37,5 +37,5 @@ using servers_list_t = std::unordered_map<std::string, server_info_t>;
 } // namespace server
 } // namespace wstux
 
-#endif /* _EXPERIMENTS_SERVER_TYPES_H_ */
+#endif /* _EXAMPLES_SERVER_TYPES_H_ */
 

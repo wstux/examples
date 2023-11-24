@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _EXPERIMENTS_SERVER_SERVER_H_
-#define _EXPERIMENTS_SERVER_SERVER_H_
+#ifndef _EXAMPLES_SERVER_SERVER_H_
+#define _EXAMPLES_SERVER_SERVER_H_
 
 #include "server/transport.h"
 #include "server/types.h"
@@ -47,5 +47,5 @@ private:
 } // namespace server
 } // namespace wstux
 
-#endif /* _EXPERIMENTS_SERVER_SERVER_H_ */
+#endif /* _EXAMPLES_SERVER_SERVER_H_ */
 
