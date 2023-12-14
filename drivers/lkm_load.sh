@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ ! "$BASH" ]; then
+    /bin/bash "$0" "$@"
+    exit "$?"
+fi
+
 # If any command ends with an error, terminate the entire script with an error.
 set -e
 
